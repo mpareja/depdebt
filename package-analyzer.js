@@ -36,6 +36,11 @@ class AnalysisRunner extends Runner {
 
   async analyze (packageJson, packageLockJson) {
     await this.process({ task: 'analyzePackage', args: [packageJson, packageLockJson] })
+
+    this.result.libyears = Object.values(this.result).reduce((acc, cur) => {
+      return acc + cur.libyears
+    }, 0)
+
     return this.result
   }
 
@@ -64,14 +69,24 @@ class AnalysisRunner extends Runner {
 
     const precedence = this.options.tagPrecedence
     const tag = precedence.find(tag => !!dependency.tags[tag])
-    if (tag) {
-      const version = dependency.tags[tag]
-      dependency.latest = version
-      dependency.latestTag = tag
-      dependency.latestTime = packument.time[version]
-    } else {
+    if (!tag) {
       throw new Error(`none of the expected tags were found: ${JSON.stringify(precedence)}`)
     }
+
+    const version = dependency.tags[tag]
+    dependency.latest = version
+    dependency.latestTag = tag
+    dependency.latestTime = packument.time[version]
+    dependency.libyears = getDecimalYears(dependency.actualTime, dependency.latestTime)
   }
 }
+
+// this doesn't handle leap years, but a day here or there doesn't matter
+function getDecimalYears (date1, date2) {
+  const diffTime = Math.abs(new Date(date2) - new Date(date1))
+  const diffDays = diffTime / (1000 * 60 * 60 * 24)
+  const diffYears = diffDays / 365
+  return diffYears
+}
+
 module.exports = { PackageAnalyzer }

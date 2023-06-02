@@ -109,6 +109,30 @@ describe('package-analyzer', () => {
       })
     })
   })
+
+  describe('libyear', () => {
+    it('is the sum of dependency libyears', async () => {
+      const { analyzer, packageJson } = setup()
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.libyears).toBe(5.201180228088534)
+    })
+
+    describe('dependency.libyear', () => {
+      it('is the number of years between actualTime and latestTime', async () => {
+        const { analyzer, packageJson } = setup()
+
+        const result = await analyzer.analyze(packageJson)
+
+        // actualTime: 2016-03-22T10:14:12.950Z
+        // latestTime: 2021-04-16T19:05:38.181Z
+        expect(result['is-obj'].libyears).toBe(5.072243950754693)
+
+        expect(result.node.libyears).toBe(0.1289362773338407)
+      })
+    })
+  })
 })
 
 function setup (options) {
