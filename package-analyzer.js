@@ -47,12 +47,8 @@ class AnalysisRunner extends Runner {
     const tags = packument['dist-tags']
 
     const dependency = this.result[dep]
-    Object.assign(dependency, {
-      latest: tags.latest,
-      lts: tags.lts,
-
-      specWanted: pickManifest(packument, dependency.spec).version
-    })
+    dependency.tags = { ...tags }
+    dependency.specWanted = pickManifest(packument, dependency.spec).version
 
     yield { task: 'getActualVersion', args: [dep, packageLockJson] }
   }

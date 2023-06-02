@@ -10,11 +10,11 @@ class Registry {
 
 class SubstituteRegistry {
   async getPackument (dependency) {
-    return this[dependency]()
+    return this[dependency + 'Packument']()
   }
 
-  async node () {
-    const data = await fs.readFile(path.join(__dirname, 'test', 'fixtures', 'node-packument.json'), 'utf8')
+  async nodePackument () {
+    const data = await fs.readFile(path.join(__dirname, 'tests', 'fixtures', 'node-packument.json'), 'utf8')
     return JSON.parse(data)
   }
 }
