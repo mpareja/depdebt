@@ -36,5 +36,8 @@
   "bugs": {
     "url": "https://github.com/mpareja/dependency-debt/issues"
   },
-  "homepage": "https://github.com/mpareja/dependency-debt#readme"
+  "homepage": "https://github.com/mpareja/dependency-debt#readme",
+  "dependencies": {
+    "npm-pick-manifest": "^8.0.1"
+  }
 }
