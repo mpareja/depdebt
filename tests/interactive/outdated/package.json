@@ -1,0 +1,7 @@
+{
+  "name": "acceptance-outdated",
+  "version": "1.0.0",
+  "dependencies": {
+    "is-obj": "^1.0.0"
+  }
+}

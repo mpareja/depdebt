@@ -14,6 +14,7 @@
     "lint": "standard -v",
     "prepare": "simple-git-hooks",
     "test": "npm run clean && npm run lint && npm run tests -- --experimental-test-coverage",
+    "test:interactive": "node --test --require ./setup-tests.js interactive/*.js",
     "tests": "node --test --require ./setup-tests.js"
   },
   "standard": {
