@@ -48,6 +48,16 @@ describe('package-analyzer', () => {
       })
     })
   })
+
+  describe('actualTime', () => {
+    it('matches the actual package version\'s release date', async () => {
+      const { analyzer, packageJson } = setup()
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.node.actualTime).toBe('2023-04-01T02:37:56.936Z')
+    })
+  })
 })
 
 function setup () {

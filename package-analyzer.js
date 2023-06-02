@@ -38,11 +38,11 @@ class AnalysisRunner extends Runner {
   async * analyzePackage (packageJson, packageLockJson) {
     for (const [dep, spec] of Object.entries(packageJson.dependencies)) {
       this.result[dep] = { spec }
-      yield { task: 'getDepVersions', args: [dep, packageLockJson] }
+      yield { task: 'getDepMetadata', args: [dep, packageLockJson] }
     }
   }
 
-  async * getDepVersions (dep, packageLockJson) {
+  async * getDepMetadata (dep, packageLockJson) {
     const packument = await this.registry.getPackument(dep)
     const tags = packument['dist-tags']
 
@@ -50,16 +50,13 @@ class AnalysisRunner extends Runner {
     dependency.tags = { ...tags }
     dependency.specWanted = pickManifest(packument, dependency.spec).version
 
-    yield { task: 'getActualVersion', args: [dep, packageLockJson] }
-  }
-
-  async * getActualVersion (dep, packageLockJson) {
-    const dependency = this.result[dep]
     dependency.actual =
       // if package-lock.json is committed to repo, use that
       packageLockJson?.packages?.['node_modules/node']?.version ??
       // otherwise, use whatever the version-spec would have installed
       dependency.specWanted
+
+    dependency.actualTime = packument.time[dependency.actual]
   }
 }
 module.exports = { PackageAnalyzer }

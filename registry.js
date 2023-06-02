@@ -4,7 +4,8 @@ const path = require('path')
 
 class Registry {
   async getPackument (dependency) {
-    return pacote.packument(dependency)
+    // fullMetadata is required in order to get publish timestamps
+    return pacote.packument(dependency, { fullMetadata: true })
   }
 }
 
