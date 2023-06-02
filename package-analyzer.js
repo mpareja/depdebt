@@ -1,9 +1,12 @@
-const fs = require('fs').promises
 const pickManifest = require('npm-pick-manifest')
 
 class PackageAnalyzer {
+  constructor (registry) {
+    this.registry = registry
+  }
+
   async analyze (packageJson, packageLockJson) {
-    const runner = new AnalysisRunner()
+    const runner = new AnalysisRunner(this.registry)
 
     return runner.analyze(packageJson, packageLockJson)
   }
@@ -20,7 +23,12 @@ class Runner {
 }
 
 class AnalysisRunner extends Runner {
-  result = {}
+  result = {} // shared mutable state, only 1 task should write to registers
+
+  constructor (registry) {
+    super()
+    this.registry = registry
+  }
 
   async analyze (packageJson, packageLockJson) {
     await this.process({ task: 'analyzePackage', args: [packageJson, packageLockJson] })
@@ -35,8 +43,7 @@ class AnalysisRunner extends Runner {
   }
 
   async * getDepVersions (dep, packageLockJson) {
-    const data = await fs.readFile('./test/fixtures/node-packument.json', 'utf8')
-    const packument = JSON.parse(data)
+    const packument = await this.registry.getPackument(dep)
     const tags = packument['dist-tags']
 
     const dependency = this.result[dep]

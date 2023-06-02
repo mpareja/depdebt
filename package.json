@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/mpareja/dependency-debt#readme",
   "dependencies": {
-    "npm-pick-manifest": "^8.0.1"
+    "npm-pick-manifest": "^8.0.1",
+    "pacote": "^15.2.0"
   }
 }
