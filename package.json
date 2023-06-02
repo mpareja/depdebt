@@ -23,11 +23,15 @@
       "node"
     ]
   },
+  "simple-git-hooks": {
+    "pre-commit": "npm test"
+  },
   "author": "Mario Pareja",
   "license": "MIT",
   "devDependencies": {
     "@jest/expect": "^29.5.0",
     "opener": "^1.5.2",
+    "simple-git-hooks": "^2.8.1",
     "standard": "^17.1.0"
   },
   "repository": {
