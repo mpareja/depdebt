@@ -1,0 +1,40 @@
+{
+  "name": "dependency-debt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "clean": "rimraf coverage",
+    "cov": "opener coverage/index.html",
+    "jest": "",
+    "lint": "standard -v",
+    "prepare": "simple-git-hooks",
+    "test": "npm run clean && npm run lint && npm run tests -- --experimental-test-coverage",
+    "tests": "node --test --require ./setup-tests.js"
+  },
+  "standard": {
+    "env": [
+      "jasmine",
+      "node"
+    ]
+  },
+  "author": "Mario Pareja",
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/expect": "^29.5.0",
+    "opener": "^1.5.2",
+    "standard": "^17.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mpareja/dependency-debt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mpareja/dependency-debt/issues"
+  },
+  "homepage": "https://github.com/mpareja/dependency-debt#readme"
+}
