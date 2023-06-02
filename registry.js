@@ -11,12 +11,12 @@ class Registry {
 
 class SubstituteRegistry {
   async getPackument (dependency) {
-    return this[dependency + 'Packument']()
-  }
-
-  async nodePackument () {
-    const data = await fs.readFile(path.join(__dirname, 'tests', 'fixtures', 'node-packument.json'), 'utf8')
-    return JSON.parse(data)
+    try {
+      const data = await fs.readFile(path.join(__dirname, 'tests', 'fixtures', `${dependency}-packument.json`), 'utf8')
+      return JSON.parse(data)
+    } catch (e) {
+      throw new Error(`SubstituteRegistry: getPackument: unexpected package name "${dependency}"`)
+    }
   }
 }
 

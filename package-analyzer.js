@@ -1,12 +1,15 @@
 const pickManifest = require('npm-pick-manifest')
 
 class PackageAnalyzer {
-  constructor (registry) {
+  constructor (registry, options) {
     this.registry = registry
+    this.options = Object.assign({
+      tagPrecedence: ['latest']
+    }, options)
   }
 
   async analyze (packageJson, packageLockJson) {
-    const runner = new AnalysisRunner(this.registry)
+    const runner = new AnalysisRunner(this.registry, this.options)
 
     return runner.analyze(packageJson, packageLockJson)
   }
@@ -25,9 +28,10 @@ class Runner {
 class AnalysisRunner extends Runner {
   result = {} // shared mutable state, only 1 task should write to registers
 
-  constructor (registry) {
+  constructor (registry, options) {
     super()
     this.registry = registry
+    this.options = options
   }
 
   async analyze (packageJson, packageLockJson) {
@@ -57,6 +61,17 @@ class AnalysisRunner extends Runner {
       dependency.specWanted
 
     dependency.actualTime = packument.time[dependency.actual]
+
+    const precedence = this.options.tagPrecedence
+    const tag = precedence.find(tag => !!dependency.tags[tag])
+    if (tag) {
+      const version = dependency.tags[tag]
+      dependency.latest = version
+      dependency.latestTag = tag
+      dependency.latestTime = packument.time[version]
+    } else {
+      throw new Error(`none of the expected tags were found: ${JSON.stringify(precedence)}`)
+    }
   }
 }
 module.exports = { PackageAnalyzer }
