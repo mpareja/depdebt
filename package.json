@@ -2,11 +2,12 @@
   "name": "dependency-debt",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "private": false,
   "engines": {
     "node": ">=18"
   },
+  "type": "module",
+  "exports": "./index.js",
   "scripts": {
     "clean": "rimraf coverage",
     "cov": "opener coverage/index.html",
@@ -14,8 +15,8 @@
     "lint": "standard -v",
     "prepare": "simple-git-hooks",
     "test": "npm run clean && npm run lint && npm run tests -- --experimental-test-coverage",
-    "test:interactive": "node --test --require ./setup-tests.js tests/interactive/*.js",
-    "tests": "node --test --require ./setup-tests.js"
+    "test:interactive": "node --test --import ./setup-tests.js tests/interactive/*.js",
+    "tests": "node --test --import ./setup-tests.js"
   },
   "standard": {
     "env": [

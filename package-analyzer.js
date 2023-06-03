@@ -1,6 +1,6 @@
-const pickManifest = require('npm-pick-manifest')
+import pickManifest from 'npm-pick-manifest'
 
-class PackageAnalyzer {
+export class PackageAnalyzer {
   constructor (registry, options) {
     this.registry = registry
     this.options = Object.assign({
@@ -88,5 +88,3 @@ function getDecimalYears (date1, date2) {
   const diffYears = diffDays / 365
   return diffYears
 }
-
-module.exports = { PackageAnalyzer }

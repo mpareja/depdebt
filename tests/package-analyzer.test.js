@@ -1,6 +1,7 @@
-const { PackageAnalyzer } = require('../package-analyzer')
-const { examplePackageJson } = require('../examples/example-package-json')
-const { SubstituteRegistry } = require('../registry')
+import { PackageAnalyzer } from '../package-analyzer.js'
+import { SubstituteRegistry } from '../registry.js'
+import { examplePackageJson } from '../examples/example-package-json.js'
+import { promises as fs } from 'fs'
 
 describe('package-analyzer', () => {
   describe('no package-lock supplied', () => {
@@ -29,7 +30,8 @@ describe('package-analyzer', () => {
     it('ideal version matches package-lock.json version', async () => {
       const { analyzer, packageJson } = setup()
 
-      const pkgLock = require('./fixtures/node-package-lock.json')
+      const filepath = new URL('fixtures/node-package-lock.json', import.meta.url)
+      const pkgLock = JSON.parse(await fs.readFile(filepath))
 
       const result = await analyzer.analyze(packageJson, pkgLock)
 

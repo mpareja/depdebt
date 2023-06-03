@@ -1,23 +1,21 @@
-const fs = require('fs').promises
-const pacote = require('pacote')
-const path = require('path')
+import pacote from 'pacote'
+import { promises as fs } from 'fs'
 
-class Registry {
+export class Registry {
   async getPackument (dependency) {
     // fullMetadata is required in order to get publish timestamps
     return pacote.packument(dependency, { fullMetadata: true })
   }
 }
 
-class SubstituteRegistry {
+export class SubstituteRegistry {
   async getPackument (dependency) {
     try {
-      const data = await fs.readFile(path.join(__dirname, 'tests', 'fixtures', `${dependency}-packument.json`), 'utf8')
+      const file = new URL(`tests/fixtures/${dependency}-packument.json`, import.meta.url)
+      const data = await fs.readFile(file, 'utf8')
       return JSON.parse(data)
     } catch (e) {
       throw new Error(`SubstituteRegistry: getPackument: unexpected package name "${dependency}"`)
     }
   }
 }
-
-module.exports = { Registry, SubstituteRegistry }

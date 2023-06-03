@@ -1,6 +1,6 @@
-const { exampleString } = require('./example-string')
+import { exampleString } from './example-string.js'
 
-const examplePackageJson = {}
+export const examplePackageJson = {}
 
 examplePackageJson.noDeps = (overrides) => {
   return Object.assign({
@@ -15,5 +15,3 @@ examplePackageJson.noDeps = (overrides) => {
     }
   }, overrides)
 }
-
-module.exports = { examplePackageJson }
