@@ -45,6 +45,7 @@
   "homepage": "https://github.com/mpareja/dependency-debt#readme",
   "dependencies": {
     "npm-pick-manifest": "^8.0.1",
+    "p-queue": "^7.3.4",
     "pacote": "^15.2.0"
   }
 }
