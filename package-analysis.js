@@ -45,7 +45,12 @@ export class PackageAnalysis {
 
     const dependency = this.result[dep]
     dependency.tags = { ...tags }
-    dependency.specWanted = pickManifest(packument, dependency.spec).version
+
+    try {
+      dependency.specWanted = pickManifest(packument, dependency.spec).version
+    } catch (cause) {
+      throw new Error(`unable to identify version for ${dep}@${dependency.spec}`, { cause })
+    }
 
     dependency.actual =
       // if package-lock.json is committed to repo, use that

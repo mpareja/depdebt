@@ -112,6 +112,19 @@ describe('package-analyzer', () => {
         expect(error.cause.errors[0].message).toEqual('none of the expected tags were found: ["bogus"]')
       })
     })
+
+    describe('invalid version spec', () => {
+      it('is an error', async () => {
+        const { analyzer, packageJson } = setup()
+        packageJson.dependencies.node = 'bogus/something.js' // old garbage I've seen in the wild
+
+        const error = await analyzer.analyze(packageJson).catch(e => e)
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error.cause.errors[0].message).toEqual('unable to identify version for node@bogus/something.js')
+        expect(error.cause.errors[0].cause).toBeDefined()
+      })
+    })
   })
 
   describe('libyear', () => {
