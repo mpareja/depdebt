@@ -1,4 +1,5 @@
 import pickManifest from 'npm-pick-manifest'
+import { createProxy } from './concurrent-proxy/concurrent-proxy.js'
 
 export class PackageAnalyzer {
   constructor (registry, options) {
@@ -9,49 +10,33 @@ export class PackageAnalyzer {
   }
 
   async analyze (packageJson, packageLockJson) {
-    const runner = new AnalysisRunner(this.registry, this.options)
+    const analyzer = new AnalysisRunner(this.registry, this.options)
+    const options = { concurrency: 1, defaultQueueLimit: 10 }
+    const { proxy, onFinished } = createProxy(analyzer, options)
 
-    return runner.analyze(packageJson, packageLockJson)
+    await proxy.analyze(packageJson, packageLockJson)
+    await onFinished()
+
+    return proxy.result
   }
 }
 
-class Runner {
-  async process (current) {
-    // ultimately, we'll want to process work items concurrently with
-    // back pressure at enqueu time
-    for await (const next of this[current.task](...current.args)) {
-      await this.process(next)
-    }
-  }
-}
-
-class AnalysisRunner extends Runner {
-  result = {} // shared mutable state, only 1 task should write to registers
+class AnalysisRunner {
+  result = { libyears: 0 } // shared mutable state, only 1 task should write to registers
 
   constructor (registry, options) {
-    super()
     this.registry = registry
     this.options = options
   }
 
   async analyze (packageJson, packageLockJson) {
-    await this.process({ task: 'analyzePackage', args: [packageJson, packageLockJson] })
-
-    this.result.libyears = Object.values(this.result).reduce((acc, cur) => {
-      return acc + cur.libyears
-    }, 0)
-
-    return this.result
-  }
-
-  async * analyzePackage (packageJson, packageLockJson) {
     for (const [dep, spec] of Object.entries(packageJson.dependencies)) {
       this.result[dep] = { spec }
-      yield { task: 'getDepMetadata', args: [dep, packageLockJson] }
+      await this.getDepMetadata(dep, packageLockJson)
     }
   }
 
-  async * getDepMetadata (dep, packageLockJson) {
+  async getDepMetadata (dep, packageLockJson) {
     const packument = await this.registry.getPackument(dep)
     const tags = packument['dist-tags']
 
@@ -78,6 +63,8 @@ class AnalysisRunner extends Runner {
     dependency.latestTag = tag
     dependency.latestTime = packument.time[version]
     dependency.libyears = getDecimalYears(dependency.actualTime, dependency.latestTime)
+
+    this.result.libyears += dependency.libyears
   }
 }
 

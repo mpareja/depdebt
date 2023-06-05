@@ -107,7 +107,7 @@ describe('package-analyzer', () => {
         const error = await analyzer.analyze(packageJson).catch(e => e)
 
         expect(error).toBeInstanceOf(Error)
-        expect(error.message).toEqual('none of the expected tags were found: ["bogus"]')
+        expect(error.cause.errors[0].message).toEqual('none of the expected tags were found: ["bogus"]')
       })
     })
   })
