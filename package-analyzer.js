@@ -3,17 +3,23 @@ import { PackageAnalysis } from './package-analysis.js'
 import { DirectoryAnalysis } from './directory-analysis.js'
 
 export class PackageAnalyzer {
-  constructor (registry, options) {
+  constructor (registry, options = {}) {
     this.registry = registry
-    this.options = Object.assign({
-      tagPrecedence: ['latest']
-    }, options)
+
+    const { tagPrecedence, ignoreMissingFromPrivateRegistry, ...executorOptions } = options
+    this.analysisOptions = {
+      tagPrecedence: options.tagPrecedence ?? ['latest'],
+      ignoreMissingFromPrivateRegistry: options.ignoreMissingFromPrivateRegistry ?? false
+    }
+    this.executorOptions = Object.assign({
+      concurrency: options.concurrency ?? 25,
+      defaultQueueLimit: options.defaultQueueLimit ?? 100
+    }, executorOptions)
   }
 
   async analyze (packageJson, packageLockJson) {
-    const options = { concurrency: 1, defaultQueueLimit: 10 }
-    const { createProxy, onFinished } = createExecutor(options)
-    const analyzer = createProxy(new PackageAnalysis(this.registry, this.options))
+    const { createProxy, onFinished } = createExecutor(this.executorOptions)
+    const analyzer = createProxy(new PackageAnalysis(this.registry, this.analysisOptions))
 
     await analyzer.analyze(packageJson, packageLockJson)
     await onFinished()
@@ -22,14 +28,13 @@ export class PackageAnalyzer {
   }
 
   async anaylzePackages (packageJsonPaths) {
-    const options = { concurrency: 100 }
-    const { createProxy, onFinished } = createExecutor(options)
+    const { createProxy, onFinished } = createExecutor(this.executorOptions)
     const analyzers = new Map()
 
     const directoryAnalysis = createProxy(new DirectoryAnalysis())
 
     await directoryAnalysis.analyzePackages(packageJsonPaths, async (packageJsonPath, pkg, pkgJson) => {
-      const analyzer = createProxy(new PackageAnalysis(this.registry, this.options), options)
+      const analyzer = createProxy(new PackageAnalysis(this.registry, this.analysisOptions))
       analyzers.set(packageJsonPath, analyzer)
       await analyzer.analyze(pkg, pkgJson)
     })
