@@ -135,6 +135,19 @@ describe('package-analyzer', () => {
 
         expect(result.node.libyears).toBe(0.1289362773338407)
       })
+
+      it('treats dependencies newer than latest as 0 libyears', async () => {
+        // package calls for latest which is newer than our target of LTS
+        const tagPrecedence = ['lts', 'latest']
+        const { analyzer, packageJson } = setup({ tagPrecedence })
+        packageJson.dependencies.node = 'latest'
+
+        const result = await analyzer.analyze(packageJson)
+
+        // actualTime: 2016-03-22T10:14:12.950Z
+        // latestTime: 2021-04-16T19:05:38.181Z
+        expect(result.node.libyears).toBe(0)
+      })
     })
   })
 

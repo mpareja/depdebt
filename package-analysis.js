@@ -72,7 +72,11 @@ export class PackageAnalysis {
 
 // this doesn't handle leap years, but a day here or there doesn't matter
 function getDecimalYears (date1, date2) {
-  const diffTime = Math.abs(new Date(date2) - new Date(date1))
+  const diffTime = new Date(date2) - new Date(date1)
+  if (diffTime < 0) {
+    return 0
+  }
+
   const diffDays = diffTime / (1000 * 60 * 60 * 24)
   const diffYears = diffDays / 365
   return diffYears
