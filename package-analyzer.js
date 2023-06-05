@@ -1,5 +1,6 @@
 import pickManifest from 'npm-pick-manifest'
 import { createExecutor } from './concurrent-proxy/concurrent-proxy.js'
+import { promises as fs } from 'fs'
 
 export class PackageAnalyzer {
   constructor (registry, options) {
@@ -12,16 +13,65 @@ export class PackageAnalyzer {
   async analyze (packageJson, packageLockJson) {
     const options = { concurrency: 1, defaultQueueLimit: 10 }
     const { createProxy, onFinished } = createExecutor(options)
-    const analyzer = createProxy(new AnalysisRunner(this.registry, this.options))
+    const analyzer = createProxy(new PackageAnalysis(this.registry, this.options))
 
     await analyzer.analyze(packageJson, packageLockJson)
     await onFinished()
 
     return analyzer.result
   }
+
+  async anaylzePackages (packageJsonPaths) {
+    const options = { concurrency: 100 }
+    const { createProxy, onFinished } = createExecutor(options)
+    const analyzers = new Map()
+
+    const directoryAnalysis = createProxy(new DirectoryAnalysis())
+
+    await directoryAnalysis.analyzePackages(packageJsonPaths, async (packageJsonPath, pkg, pkgJson) => {
+      const analyzer = createProxy(new PackageAnalysis(this.registry, this.options), options)
+      analyzers.set(packageJsonPath, analyzer)
+      await analyzer.analyze(pkg, pkgJson)
+    })
+
+    await onFinished()
+
+    const result = { libyears: 0 }
+
+    for (const [packageJsonPath, analyzer] of analyzers.entries()) {
+      result[packageJsonPath] = analyzer.result
+      result.libyears += analyzer.result.libyears
+    }
+
+    return result
+  }
 }
 
-class AnalysisRunner {
+class DirectoryAnalysis {
+  async analyzePackages (packageJsonPaths, analyzePackage) {
+    for await (const packageJsonPath of packageJsonPaths) {
+      const packageLockJsonPath = packageJsonPath.replace(/package\.json$/, 'package-lock.json')
+      const [pkg, pkgLock] = await Promise.allSettled([
+        fs.readFile(packageJsonPath, 'utf8'),
+        fs.readFile(packageLockJsonPath, 'utf8')
+      ])
+
+      if (pkg.status === 'rejected') {
+        throw pkg.reason
+      }
+      const packageJson = JSON.parse(pkg.value)
+
+      let packageLockJson = null
+      if (pkgLock.status === 'fulfilled') {
+        packageLockJson = JSON.parse(pkgLock.value)
+      }
+
+      await analyzePackage(packageJsonPath, packageJson, packageLockJson)
+    }
+  }
+}
+
+class PackageAnalysis {
   result = { libyears: 0 } // shared mutable state, only 1 task should write to registers
 
   constructor (registry, options) {
@@ -29,8 +79,30 @@ class AnalysisRunner {
     this.options = options
   }
 
+  async anaylzePackages (packageJsonPaths) {
+    for await (const packageJsonPath of packageJsonPaths) {
+      const packageLockJsonPath = packageJsonPath.replace(/package\.json$/, 'package-lock.json')
+      const [pkg, pkgLock] = await Promise.allSettled([
+        fs.readFile(packageJsonPath, 'utf8'),
+        fs.readFile(packageLockJsonPath, 'utf8')
+      ])
+
+      if (pkg.status === 'rejected') {
+        throw pkg.reason
+      }
+      const packageJson = JSON.parse(pkg.value)
+
+      let packageLockJson = null
+      if (pkgLock.status === 'fulfilled') {
+        packageLockJson = JSON.parse(pkgLock.value)
+      }
+
+      await this.analyze(packageJson, packageLockJson)
+    }
+  }
+
   async analyze (packageJson, packageLockJson) {
-    for (const [dep, spec] of Object.entries(packageJson.dependencies)) {
+    for (const [dep, spec] of Object.entries(packageJson.dependencies ?? {})) {
       this.result[dep] = { spec }
       await this.getDepMetadata(dep, packageLockJson)
     }

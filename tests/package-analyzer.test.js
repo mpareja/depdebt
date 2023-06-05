@@ -2,6 +2,8 @@ import { PackageAnalyzer } from '../package-analyzer.js'
 import { SubstituteRegistry } from '../registry.js'
 import { examplePackageJson } from '../examples/example-package-json.js'
 import { promises as fs } from 'fs'
+import { fileURLToPath } from 'url'
+import path from 'path'
 
 describe('package-analyzer', () => {
   describe('no package-lock supplied', () => {
@@ -133,6 +135,23 @@ describe('package-analyzer', () => {
 
         expect(result.node.libyears).toBe(0.1289362773338407)
       })
+    })
+  })
+
+  describe('analyzePackages', () => {
+    it('sums libyears across all package.json files', async () => {
+      const { analyzer } = setup()
+
+      const dir = fileURLToPath(new URL('interactive', import.meta.url))
+      const first = path.join(dir, 'outdated', 'package.json')
+      const second = path.join(dir, 'nested', 'outdated', 'package.json')
+      const packageJsonPaths = [first, second]
+
+      const result = await analyzer.anaylzePackages(packageJsonPaths)
+
+      expect(result.libyears).toBe(10.144487901509386)
+      expect(result[first]).toBeDefined()
+      expect(result[second]).toBeDefined()
     })
   })
 })
