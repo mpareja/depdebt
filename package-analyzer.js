@@ -6,10 +6,10 @@ export class PackageAnalyzer {
   constructor (registry, options = {}) {
     this.registry = registry
 
-    const { tagPrecedence, ignoreMissingFromPrivateRegistry, ...executorOptions } = options
+    const { tagPrecedence, missingPackageStrategy, ...executorOptions } = options
     this.analysisOptions = {
       tagPrecedence: options.tagPrecedence ?? ['latest'],
-      ignoreMissingFromPrivateRegistry: options.ignoreMissingFromPrivateRegistry ?? false
+      missingPackageStrategy: options.missingPackageStrategy ?? 'throw'
     }
     this.executorOptions = Object.assign({
       concurrency: options.concurrency ?? 25,

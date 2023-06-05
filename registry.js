@@ -15,7 +15,9 @@ export class SubstituteRegistry {
       const data = await fs.readFile(file, 'utf8')
       return JSON.parse(data)
     } catch (e) {
-      throw new Error(`SubstituteRegistry: getPackument: unexpected package name "${dependency}"`)
+      const error = new Error(`SubstituteRegistry: getPackument: unexpected package name "${dependency}"`)
+      error.statusCode = 404 // like npm
+      throw error
     }
   }
 }

@@ -40,10 +40,21 @@ export class PackageAnalysis {
   }
 
   async getDepMetadata (dep, packageLockJson) {
-    const packument = await this.registry.getPackument(dep)
-    const tags = packument['dist-tags']
-
     const dependency = this.result[dep]
+
+    let packument
+    try {
+      packument = await this.registry.getPackument(dep)
+    } catch (e) {
+      if (e.statusCode === 404 && this.options.missingPackageStrategy === 'ignore') {
+        dependency.libyears = 0
+        dependency.missing = true
+        return
+      }
+      throw e
+    }
+
+    const tags = packument['dist-tags']
     dependency.tags = { ...tags }
 
     try {

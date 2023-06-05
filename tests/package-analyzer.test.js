@@ -125,6 +125,35 @@ describe('package-analyzer', () => {
         expect(error.cause.errors[0].cause).toBeDefined()
       })
     })
+
+    describe('missingPackageStrategy', () => {
+      describe('given dependency is missing', () => {
+        describe('"throw" strategy', () => {
+          it('raises an error', async () => {
+            const { analyzer, packageJson } = setup({ missingPackageStrategy: 'throw' })
+            packageJson.dependencies.someBogusPackageNeverMade = '1.0.0'
+
+            const error = await analyzer.analyze(packageJson).catch(e => e)
+
+            expect(error).toBeInstanceOf(Error)
+          })
+        })
+
+        describe('"ignore" strategy', () => {
+          it('ignores the error, sets libyears to 0, and indicates dep was missing', async () => {
+            const { analyzer, packageJson } = setup({ missingPackageStrategy: 'ignore' })
+            packageJson.dependencies.someBogusPackageNeverMade = '1.0.0'
+
+            const result = await analyzer.analyze(packageJson)
+
+            expect(result.someBogusPackageNeverMade).toMatchObject({
+              libyears: 0,
+              missing: true
+            })
+          })
+        })
+      })
+    })
   })
 
   describe('libyear', () => {
