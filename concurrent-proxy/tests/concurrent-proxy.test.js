@@ -1,4 +1,4 @@
-import { createProxy } from '../concurrent-proxy.js'
+import { createExecutor } from '../concurrent-proxy.js'
 import { promisify } from 'util'
 import { exampleString } from '../../examples/example-string.js'
 
@@ -8,8 +8,10 @@ describe('concurrent-proxy', () => {
   const options = { concurrency: 1 /* , telemetry: new ConsoleLogTelemetry() */ }
 
   it('original behaviour is observed', async () => {
+    const { createProxy, onFinished } = createExecutor(options)
+
     const original = new ExampleWorker()
-    const { proxy, onFinished } = createProxy(original, options)
+    const proxy = createProxy(original)
 
     await proxy.processDir('some-dir', 12)
     await onFinished()
@@ -21,8 +23,8 @@ describe('concurrent-proxy', () => {
   })
 
   it('processing is not blocked by downstream work', async () => {
-    const original = new ExampleWorker()
-    const { proxy, onFinished } = createProxy(original, options)
+    const { createProxy, onFinished } = createExecutor(options)
+    const proxy = createProxy(new ExampleWorker())
 
     // kick off processing. Keep in mind, this only blocks
     // if the queue is full.
@@ -50,9 +52,9 @@ describe('concurrent-proxy', () => {
     // make the file processing slow and limit the queue length to cause blocking
     const fileMs = 100
     const options = { concurrency: 1, defaultQueueLimit: 2 }
+    const { createProxy, onFinished } = createExecutor(options)
 
-    const original = new ExampleWorker({ fileMs })
-    const { proxy, onFinished } = createProxy(original, options)
+    const proxy = createProxy(new ExampleWorker({ fileMs }))
 
     // kick off processing
     await proxy.processDir('some-dir', 5)
@@ -64,7 +66,7 @@ describe('concurrent-proxy', () => {
     const foundCount = proxy.found.length
     const processedCount = proxy.processed.length
 
-    original.fileMs = 0 // make processing instant so test completes quickly
+    proxy.fileMs = 0 // make processing instant so test completes quickly
     await onFinished() // for cleanliness ensure complete before we start doing our assertions
 
     // we expect 4 entries in foundCount because:
@@ -79,17 +81,15 @@ describe('concurrent-proxy', () => {
     expect(proxy.processed.length).toBe(5)
   })
 
-  describe('createChildProxy', () => {
+  describe('createProxy', () => {
     it('child proxy instances share queues with parents', async () => {
       const parent = new ExampleWorker({ fileMs: 1, dirMs: 1 })
       const child = new ExampleWorker({ fileMs: 1, dirMs: 1 })
 
-      const { createChildProxy, proxy, onFinished, queues } = createProxy(parent, options)
+      const { createProxy, onFinished, queues } = createExecutor(options)
 
-      const childProxy = createChildProxy(child)
-
-      await proxy.processDir('some-dir', 3)
-      await childProxy.processDir('other-dir', 4)
+      await createProxy(parent).processDir('some-dir', 3)
+      await createProxy(child).processDir('other-dir', 4)
 
       await onFinished()
 
@@ -101,9 +101,9 @@ describe('concurrent-proxy', () => {
 
   describe('error handling', () => {
     it('propagates error encountered', async () => {
-      const original = new FailingExampleWorker()
       const opts = { concurrency: 2 }
-      const { proxy, onFinished } = createProxy(original, opts)
+      const { createProxy, onFinished } = createExecutor(opts)
+      const proxy = createProxy(new FailingExampleWorker())
 
       await proxy.start()
 
@@ -114,8 +114,8 @@ describe('concurrent-proxy', () => {
     })
 
     it('propagates error encountered', async () => {
-      const original = new FailingExampleWorker()
-      const { proxy, onFinished } = createProxy(original, options)
+      const { createProxy, onFinished } = createExecutor(options)
+      const proxy = createProxy(new FailingExampleWorker())
 
       await proxy.start(1)
 
@@ -130,8 +130,8 @@ describe('concurrent-proxy', () => {
     })
 
     it('aborts queued tasks', async () => {
-      const original = new FailingExampleWorker()
-      const { proxy, onFinished } = createProxy(original, options)
+      const { createProxy, onFinished } = createExecutor(options)
+      const proxy = createProxy(new FailingExampleWorker())
 
       await proxy.start(100)
 
@@ -146,12 +146,12 @@ describe('concurrent-proxy', () => {
 
 describe('ExampleWorker', () => {
   it('pretends to find and process files', async () => {
-    const proxy = new ExampleWorker()
+    const worker = new ExampleWorker()
 
-    await proxy.processDir('some-dir', 12)
+    await worker.processDir('some-dir', 12)
 
-    expect(proxy.found).toHaveLength(12)
-    expect(proxy.processed).toHaveLength(12)
+    expect(worker.found).toHaveLength(12)
+    expect(worker.processed).toHaveLength(12)
   })
 })
 

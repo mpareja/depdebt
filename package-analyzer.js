@@ -1,5 +1,5 @@
 import pickManifest from 'npm-pick-manifest'
-import { createProxy } from './concurrent-proxy/concurrent-proxy.js'
+import { createExecutor } from './concurrent-proxy/concurrent-proxy.js'
 
 export class PackageAnalyzer {
   constructor (registry, options) {
@@ -10,14 +10,14 @@ export class PackageAnalyzer {
   }
 
   async analyze (packageJson, packageLockJson) {
-    const analyzer = new AnalysisRunner(this.registry, this.options)
     const options = { concurrency: 1, defaultQueueLimit: 10 }
-    const { proxy, onFinished } = createProxy(analyzer, options)
+    const { createProxy, onFinished } = createExecutor(options)
+    const analyzer = createProxy(new AnalysisRunner(this.registry, this.options))
 
-    await proxy.analyze(packageJson, packageLockJson)
+    await analyzer.analyze(packageJson, packageLockJson)
     await onFinished()
 
-    return proxy.result
+    return analyzer.result
   }
 }
 

@@ -8,14 +8,12 @@ import PQueue from 'p-queue'
 @param Options options
 @returns {{ proxy, onFinished }}
  */
-export function createProxy (target, options = {}) {
+export function createExecutor (options = {}) {
   const telemetry = options.telemetry ?? new NullTelemetry()
   const queues = new Map()
 
   let inFlight = 0
   const errors = []
-
-  const proxy = createChildProxy(target)
 
   const abort = () => {
     for (const queue of queues.values()) {
@@ -39,7 +37,7 @@ export function createProxy (target, options = {}) {
     }
   }
 
-  function createChildProxy (target) {
+  function createProxy (target) {
     return new Proxy(target, {
       get (target, key, receiver) {
         if (typeof target[key] === 'function') {
@@ -83,7 +81,7 @@ export function createProxy (target, options = {}) {
     })
   }
 
-  return { proxy, onFinished, createChildProxy, queues }
+  return { createProxy, onFinished, queues }
 }
 
 export class NullTelemetry {
