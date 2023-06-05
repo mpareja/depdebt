@@ -79,6 +79,26 @@ describe('concurrent-proxy', () => {
     expect(proxy.processed.length).toBe(5)
   })
 
+  describe('createChildProxy', () => {
+    it('child proxy instances share queues with parents', async () => {
+      const parent = new ExampleWorker({ fileMs: 1, dirMs: 1 })
+      const child = new ExampleWorker({ fileMs: 1, dirMs: 1 })
+
+      const { createChildProxy, proxy, onFinished, queues } = createProxy(parent, options)
+
+      const childProxy = createChildProxy(child)
+
+      await proxy.processDir('some-dir', 3)
+      await childProxy.processDir('other-dir', 4)
+
+      await onFinished()
+
+      expect(queues.size).toBe(2)
+      expect(parent.processed).toHaveLength(3)
+      expect(child.processed).toHaveLength(4)
+    })
+  })
+
   describe('error handling', () => {
     it('propagates error encountered', async () => {
       const original = new FailingExampleWorker()

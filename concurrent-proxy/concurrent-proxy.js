@@ -15,47 +15,7 @@ export function createProxy (target, options = {}) {
   let inFlight = 0
   const errors = []
 
-  const proxy = new Proxy(target, {
-    get (target, key, receiver) {
-      if (typeof target[key] === 'function') {
-        return async function (...args) {
-          telemetry.enqueuing(key, args)
-
-          let queue = queues.get(key)
-          if (!queue) {
-            queue = new PQueue(options)
-            queues.set(key, queue)
-          }
-
-          const limit = options.defaultQueueLimit
-          if (limit > 0 && queue.size >= limit) {
-            // NOTE: limit + concurrency is the potential number of
-            // jobs that will still be getting processed
-            telemetry.onQueueLimitReached(key, args, limit, queue.pending)
-            await queue.onSizeLessThan(limit)
-          }
-
-          queue.add(async () => {
-            telemetry.started(key, args)
-            inFlight++
-            // TODO: throw if result is returned
-            // TODO: handle errors
-            try {
-              await target[key].apply(receiver, args)
-            } catch (e) {
-              telemetry.onError(key, args, e)
-              errors.push(e)
-              abort()
-            }
-            inFlight--
-            telemetry.completed(key, args)
-          })
-        }
-      } else {
-        return target[key]
-      }
-    }
-  })
+  const proxy = createChildProxy(target)
 
   const abort = () => {
     for (const queue of queues.values()) {
@@ -79,7 +39,51 @@ export function createProxy (target, options = {}) {
     }
   }
 
-  return { proxy, onFinished }
+  function createChildProxy (target) {
+    return new Proxy(target, {
+      get (target, key, receiver) {
+        if (typeof target[key] === 'function') {
+          return async function (...args) {
+            telemetry.enqueuing(key, args)
+
+            let queue = queues.get(key)
+            if (!queue) {
+              queue = new PQueue(options)
+              queues.set(key, queue)
+            }
+
+            const limit = options.defaultQueueLimit
+            if (limit > 0 && queue.size >= limit) {
+              // NOTE: limit + concurrency is the potential number of
+              // jobs that will still be getting processed
+              telemetry.onQueueLimitReached(key, args, limit, queue.pending)
+              await queue.onSizeLessThan(limit)
+            }
+
+            queue.add(async () => {
+              telemetry.started(key, args)
+              inFlight++
+              // TODO: throw if result is returned
+              // TODO: handle errors
+              try {
+                await target[key].apply(receiver, args)
+              } catch (e) {
+                telemetry.onError(key, args, e)
+                errors.push(e)
+                abort()
+              }
+              inFlight--
+              telemetry.completed(key, args)
+            })
+          }
+        } else {
+          return target[key]
+        }
+      }
+    })
+  }
+
+  return { proxy, onFinished, createChildProxy, queues }
 }
 
 export class NullTelemetry {
