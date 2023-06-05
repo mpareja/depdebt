@@ -2,11 +2,18 @@ import PQueue from 'p-queue'
 
 // Returns a worker proxy whose functions ONLY block when they cannot be
 // queued for future processing.
+/*
+@typedef {{ telemetry: any, concurrency: number, defaultQueueLimit: number }} Option
+@param any target
+@param Options options
+@returns {{ proxy, onFinished }}
+ */
 export function createProxy (target, options = {}) {
   const telemetry = options.telemetry ?? new NullTelemetry()
   const queues = new Map()
 
   let inFlight = 0
+  const errors = []
 
   const proxy = new Proxy(target, {
     get (target, key, receiver) {
@@ -33,7 +40,13 @@ export function createProxy (target, options = {}) {
             inFlight++
             // TODO: throw if result is returned
             // TODO: handle errors
-            await target[key].apply(receiver, args)
+            try {
+              await target[key].apply(receiver, args)
+            } catch (e) {
+              telemetry.onError(key, args, e)
+              errors.push(e)
+              abort()
+            }
             inFlight--
             telemetry.completed(key, args)
           })
@@ -44,6 +57,12 @@ export function createProxy (target, options = {}) {
     }
   })
 
+  const abort = () => {
+    for (const queue of queues.values()) {
+      queue.clear()
+    }
+  }
+
   const onFinished = async () => {
     telemetry.onFinishedStarted(queues.size)
     while (true) {
@@ -52,7 +71,12 @@ export function createProxy (target, options = {}) {
         break
       }
     }
-    telemetry.onFinishedCompleted(queues.size)
+
+    telemetry.onFinishedCompleted(queues.size, errors)
+    if (errors.length > 0) {
+      const message = `Error${errors.length > 1 ? 's' : ''} encountered during concurrent processing`
+      throw new Error(message, { cause: { errors } })
+    }
   }
 
   return { proxy, onFinished }
@@ -65,6 +89,7 @@ export class NullTelemetry {
   onFinishedStarted () {}
   onFinishedCompleted () {}
   onQueueLimitReached (key, args, limit, pending) {}
+  onError (key, args, e) {}
 }
 
 export class ConsoleLogTelemetry {
@@ -84,11 +109,22 @@ export class ConsoleLogTelemetry {
     console.log(`onFinished: started (${size} queues)`)
   }
 
-  onFinishedCompleted (size) {
-    console.log(`onFinished: completed (${size} queues)`)
+  onFinishedCompleted (size, errors) {
+    const errorNum = errors.length
+    const errMessage =
+      errorNum === 1
+        ? ', 1 error'
+        : errorNum > 1
+          ? `, ${errorNum} errors`
+          : ''
+    console.log(`onFinished: completed (${size} queues${errMessage})`)
   }
 
   onQueueLimitReached (key, args, limit, pending) {
     console.log(`${key}(${args}): queue limit of ${limit} reached with ${pending} in-flight`)
+  }
+
+  onError (key, args, e) {
+    console.log(`${key}(${args}): ERROR:`, e)
   }
 }

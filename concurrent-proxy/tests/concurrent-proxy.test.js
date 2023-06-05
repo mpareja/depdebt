@@ -78,6 +78,50 @@ describe('concurrent-proxy', () => {
     expect(proxy.found.length).toBe(5)
     expect(proxy.processed.length).toBe(5)
   })
+
+  describe('error handling', () => {
+    it('propagates error encountered', async () => {
+      const original = new FailingExampleWorker()
+      const opts = { concurrency: 2 }
+      const { proxy, onFinished } = createProxy(original, opts)
+
+      await proxy.start()
+
+      const error = await onFinished().catch(e => e)
+
+      expect(error).toBeInstanceOf(Error)
+      expect(error.message).toBe('Error encountered during concurrent processing')
+    })
+
+    it('propagates error encountered', async () => {
+      const original = new FailingExampleWorker()
+      const { proxy, onFinished } = createProxy(original, options)
+
+      await proxy.start(1)
+
+      const error = await onFinished().catch(e => e)
+
+      expect(error).toBeInstanceOf(Error)
+      expect(error.message).toBe('Errors encountered during concurrent processing')
+      expect(error.cause.errors).toMatchObject([
+        { message: 'example error: start' },
+        { message: 'example error: child' }
+      ])
+    })
+
+    it('aborts queued tasks', async () => {
+      const original = new FailingExampleWorker()
+      const { proxy, onFinished } = createProxy(original, options)
+
+      await proxy.start(100)
+
+      const error = await onFinished().catch(e => e)
+
+      // expect much less than then the 101 (parent + 100 child) errors because
+      // queues will be cleared before they are all processed
+      expect(error.cause.errors.length).toBeLessThan(50)
+    })
+  })
 })
 
 describe('ExampleWorker', () => {
@@ -90,6 +134,24 @@ describe('ExampleWorker', () => {
     expect(proxy.processed).toHaveLength(12)
   })
 })
+
+class FailingExampleWorker {
+  async start (childErrors = 0) {
+    await delay(1)
+
+    while (childErrors-- > 0) {
+      await this.child()
+    }
+
+    throw new Error('example error: start')
+  }
+
+  async child () {
+    await delay(1)
+
+    throw new Error('example error: child')
+  }
+}
 
 class ExampleWorker {
   found = []
