@@ -63,12 +63,11 @@ export class PackageAnalysis {
       throw new Error(`unable to identify version for ${dep}@${dependency.spec}`, { cause })
     }
 
-    dependency.actual =
-      // if package-lock.json is committed to repo, use that
-      packageLockJson?.packages?.['node_modules/node']?.version ??
-      // otherwise, use whatever the version-spec would have installed
-      dependency.specWanted
-
+    // if package-lock.json is committed to repo, use that
+    // otherwise, use whatever the version-spec would have installed
+    const packageLockVersion = packageLockJson?.packages?.[`node_modules/${dep}`]?.version
+    dependency.actual = packageLockVersion ?? dependency.specWanted
+    dependency.actualSource = packageLockVersion ? 'package-lock.json' : 'package.json'
     dependency.actualTime = packument.time[dependency.actual]
 
     const precedence = this.options.tagPrecedence

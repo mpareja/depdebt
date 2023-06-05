@@ -15,6 +15,7 @@ describe('package-analyzer', () => {
       expect(result).toMatchObject({
         node: {
           actual: '16.20.0', // no package-lock.json supplied
+          actualSource: 'package.json',
 
           spec: '^16.14.2',
           specWanted: '16.20.0',
@@ -40,6 +41,7 @@ describe('package-analyzer', () => {
       expect(result).toMatchObject({
         node: {
           actual: '16.17.0', // from package-lock.json
+          actualSource: 'package-lock.json',
 
           spec: '^16.14.2',
           specWanted: '16.20.0',
