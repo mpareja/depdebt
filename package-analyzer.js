@@ -41,7 +41,7 @@ export class PackageAnalyzer {
 
     await onFinished()
 
-    const result = { packages: {}, libyears: 0 }
+    const result = { packages: {}, ...this.analysisOptions, libyears: 0 }
 
     for (const [packageJsonPath, analyzer] of analyzers.entries()) {
       result.packages[packageJsonPath] = analyzer.result
