@@ -3,8 +3,8 @@
 import path from 'path'
 import { PackageAnalyzer } from '../package-analyzer.js'
 import { Registry } from '../registry.js'
-import { NullTelemetry } from '../concurrent-proxy/concurrent-proxy.js'
 import { format, parseArgs } from 'node:util'
+import { NullTelemetry } from '../concurrent-proxy/null-telemetry.js'
 
 async function main () {
   const { values, positionals } = parseArguments()

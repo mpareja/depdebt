@@ -1,4 +1,5 @@
 import PQueue from 'p-queue'
+import { NullTelemetry } from './null-telemetry.js'
 
 // Returns a worker proxy whose functions ONLY block when they cannot be
 // queued for future processing.
@@ -82,51 +83,4 @@ export function createExecutor (options = {}) {
   }
 
   return { createProxy, onFinished, queues }
-}
-
-export class NullTelemetry {
-  enqueuing (key, args) {}
-  started (key, args) {}
-  completed (key, args) {}
-  onFinishedStarted () {}
-  onFinishedCompleted () {}
-  onQueueLimitReached (key, args, limit, pending) {}
-  onError (key, args, e) {}
-}
-
-export class ConsoleLogTelemetry {
-  enqueuing (key, args) {
-    console.log(`${key}(${args}): enqueuing`)
-  }
-
-  started (key, args) {
-    console.log(`${key}(${args}): started`)
-  }
-
-  completed (key, args) {
-    console.log(`${key}(${args}): completed`)
-  }
-
-  onFinishedStarted (size) {
-    console.log(`onFinished: started (${size} queues)`)
-  }
-
-  onFinishedCompleted (size, errors) {
-    const errorNum = errors.length
-    const errMessage =
-      errorNum === 1
-        ? ', 1 error'
-        : errorNum > 1
-          ? `, ${errorNum} errors`
-          : ''
-    console.log(`onFinished: completed (${size} queues${errMessage})`)
-  }
-
-  onQueueLimitReached (key, args, limit, pending) {
-    console.log(`${key}(${args}): queue limit of ${limit} reached with ${pending} in-flight`)
-  }
-
-  onError (key, args, e) {
-    console.log(`${key}(${args}): ERROR:`, e)
-  }
 }
