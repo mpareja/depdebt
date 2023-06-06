@@ -20,9 +20,9 @@ async function main () {
     telemetry: new StderrTelemetry()
   })
 
-  const lines = positionals.length > 0
-    ? positionals
-    : readLines(process.stdin)
+  const lines = values.stdin
+    ? readLines(process.stdin)
+    : positionals
 
   const packageJsonPaths = resolvePaths(lines)
 
@@ -32,7 +32,7 @@ async function main () {
 }
 
 function parseArguments () {
-  return parseArgs({
+  const { values, positionals } = parseArgs({
     allowPositionals: true,
     strict: true,
     options: {
@@ -53,6 +53,14 @@ function parseArguments () {
       }
     }
   })
+
+  if (positionals.length === 0) {
+    positionals.push('package.json')
+  } else if (positionals[0] === '-') {
+    values.stdin = true
+  }
+
+  return { values, positionals }
 }
 
 function printUsage () {
@@ -63,12 +71,12 @@ function printUsage () {
   console.log('  -m, --missing <strategy>    Missing package strategy (default: throw, supports ignore) ')
   console.log('  -h, --help                  Show this help')
   console.log()
-  console.log('If file names are not supplied on the command line, listens for newline delimited file names from stdin.')
+  console.log('If file names are not supplied on the command line, defaults to "package.json". The special file name "-" instructs depdebt to listens for newline delimited file names from stdin.')
   console.log()
   console.log('Examples:')
   console.log('  depdebt package.json')
   console.log('  depdebt -t lts -t latest package.json')
-  console.log('  find -name package.json -not -path ' * /node_modules/ * ' | depdebt')
+  console.log('  find -name package.json -not -path \'*/node_modules/*\' | depdebt')
 }
 
 class StderrTelemetry extends NullTelemetry {
