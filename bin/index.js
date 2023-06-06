@@ -8,6 +8,10 @@ import { format, parseArgs } from 'node:util'
 
 async function main () {
   const { values, positionals } = parseArguments()
+  if (values.help) {
+    printUsage()
+    return
+  }
 
   const registry = new Registry()
   const analyzer = new PackageAnalyzer(registry, {
@@ -42,9 +46,29 @@ function parseArguments () {
         type: 'string',
         short: 'm',
         default: 'throw'
+      },
+      help: {
+        type: 'boolean',
+        short: 'h'
       }
     }
   })
+}
+
+function printUsage () {
+  console.log('Usage: depdebt [options] [package.json ...]')
+  console.log()
+  console.log('Options:')
+  console.log('  -t, --tag-precedence <tag>  Tag precedence (default: latest, supports multiple)')
+  console.log('  -m, --missing <strategy>    Missing package strategy (default: throw, supports ignore) ')
+  console.log('  -h, --help                  Show this help')
+  console.log()
+  console.log('If file names are not supplied on the command line, listens for newline delimited file names from stdin.')
+  console.log()
+  console.log('Examples:')
+  console.log('  depdebt package.json')
+  console.log('  depdebt -t lts -t latest package.json')
+  console.log('  find -name package.json -not -path ' * /node_modules/ * ' | depdebt')
 }
 
 class StderrTelemetry extends NullTelemetry {
