@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import pickManifest from 'npm-pick-manifest'
 
 export class PackageAnalysis {
-  result = { libyears: 0 } // shared mutable state, only 1 task should write to registers
+  result = { dependencies: {}, libyears: 0 } // shared mutable state, only 1 task should write to registers
 
   constructor (registry, options) {
     this.registry = registry
@@ -34,13 +34,13 @@ export class PackageAnalysis {
   async analyze (packageJson, packageLockJson) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
     for (const [dep, spec] of Object.entries(dependencies)) {
-      this.result[dep] = { spec }
+      this.result.dependencies[dep] = { spec }
       await this.getDepMetadata(dep, packageLockJson)
     }
   }
 
   async getDepMetadata (dep, packageLockJson) {
-    const dependency = this.result[dep]
+    const dependency = this.result.dependencies[dep]
 
     let packument
     try {

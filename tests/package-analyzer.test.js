@@ -13,16 +13,18 @@ describe('package-analyzer', () => {
       const result = await analyzer.analyze(packageJson)
 
       expect(result).toMatchObject({
-        node: {
-          actual: '16.20.0', // no package-lock.json supplied
-          actualSource: 'package.json',
+        dependencies: {
+          node: {
+            actual: '16.20.0', // no package-lock.json supplied
+            actualSource: 'package.json',
 
-          spec: '^16.14.2',
-          specWanted: '16.20.0',
+            spec: '^16.14.2',
+            specWanted: '16.20.0',
 
-          tags: {
-            latest: '20.2.0',
-            lts: '18.14.0'
+            tags: {
+              latest: '20.2.0',
+              lts: '18.14.0'
+            }
           }
         }
       })
@@ -39,16 +41,18 @@ describe('package-analyzer', () => {
       const result = await analyzer.analyze(packageJson, pkgLock)
 
       expect(result).toMatchObject({
-        node: {
-          actual: '16.17.0', // from package-lock.json
-          actualSource: 'package-lock.json',
+        dependencies: {
+          node: {
+            actual: '16.17.0', // from package-lock.json
+            actualSource: 'package-lock.json',
 
-          spec: '^16.14.2',
-          specWanted: '16.20.0',
+            spec: '^16.14.2',
+            specWanted: '16.20.0',
 
-          tags: {
-            latest: '20.2.0',
-            lts: '18.14.0'
+            tags: {
+              latest: '20.2.0',
+              lts: '18.14.0'
+            }
           }
         }
       })
@@ -61,7 +65,7 @@ describe('package-analyzer', () => {
 
       const result = await analyzer.analyze(packageJson)
 
-      expect(result.node.actualTime).toBe('2023-04-01T02:37:56.936Z')
+      expect(result.dependencies.node.actualTime).toBe('2023-04-01T02:37:56.936Z')
     })
   })
 
@@ -71,9 +75,9 @@ describe('package-analyzer', () => {
 
       const result = await analyzer.analyze(packageJson)
 
-      expect(result.node.latest).toBe('20.2.0')
-      expect(result.node.latestTag).toBe('latest')
-      expect(result.node.latestTime).toBe('2023-05-18T04:06:51.378Z')
+      expect(result.dependencies.node.latest).toBe('20.2.0')
+      expect(result.dependencies.node.latestTag).toBe('latest')
+      expect(result.dependencies.node.latestTime).toBe('2023-05-18T04:06:51.378Z')
     })
 
     describe('given a tagPrecedence of ["lts", "latest"]', () => {
@@ -85,9 +89,9 @@ describe('package-analyzer', () => {
 
           const result = await analyzer.analyze(packageJson)
 
-          expect(result.node.latest).toBe('18.14.0')
-          expect(result.node.latestTag).toBe('lts')
-          expect(result.node.latestTime).toBe('2023-02-03T05:04:43.531Z')
+          expect(result.dependencies.node.latest).toBe('18.14.0')
+          expect(result.dependencies.node.latestTag).toBe('lts')
+          expect(result.dependencies.node.latestTime).toBe('2023-02-03T05:04:43.531Z')
         })
       })
 
@@ -97,9 +101,9 @@ describe('package-analyzer', () => {
 
           const result = await analyzer.analyze(packageJson)
 
-          expect(result['is-obj'].latestTag).toBe('latest')
-          expect(result['is-obj'].latest).toBe('3.0.0')
-          expect(result['is-obj'].latestTime).toBe('2021-04-16T19:05:38.181Z')
+          expect(result.dependencies['is-obj'].latestTag).toBe('latest')
+          expect(result.dependencies['is-obj'].latest).toBe('3.0.0')
+          expect(result.dependencies['is-obj'].latestTime).toBe('2021-04-16T19:05:38.181Z')
         })
       })
     })
@@ -148,7 +152,7 @@ describe('package-analyzer', () => {
 
             const result = await analyzer.analyze(packageJson)
 
-            expect(result.someBogusPackageNeverMade).toMatchObject({
+            expect(result.dependencies.someBogusPackageNeverMade).toMatchObject({
               libyears: 0,
               missing: true
             })
@@ -175,9 +179,9 @@ describe('package-analyzer', () => {
 
         // actualTime: 2016-03-22T10:14:12.950Z
         // latestTime: 2021-04-16T19:05:38.181Z
-        expect(result['is-obj'].libyears).toBe(5.072243950754693)
+        expect(result.dependencies['is-obj'].libyears).toBe(5.072243950754693)
 
-        expect(result.node.libyears).toBe(0.1289362773338407)
+        expect(result.dependencies.node.libyears).toBe(0.1289362773338407)
       })
 
       it('treats dependencies newer than latest as 0 libyears', async () => {
@@ -190,7 +194,7 @@ describe('package-analyzer', () => {
 
         // actualTime: 2016-03-22T10:14:12.950Z
         // latestTime: 2021-04-16T19:05:38.181Z
-        expect(result.node.libyears).toBe(0)
+        expect(result.dependencies.node.libyears).toBe(0)
       })
     })
   })
@@ -207,8 +211,8 @@ describe('package-analyzer', () => {
       const result = await analyzer.anaylzePackages(packageJsonPaths)
 
       expect(result.libyears).toBe(10.144487901509386)
-      expect(result[first]).toBeDefined()
-      expect(result[second]).toBeDefined()
+      expect(result.packages[first]).toBeDefined()
+      expect(result.packages[second]).toBeDefined()
     })
   })
 })

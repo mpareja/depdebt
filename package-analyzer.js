@@ -41,10 +41,10 @@ export class PackageAnalyzer {
 
     await onFinished()
 
-    const result = { libyears: 0 }
+    const result = { packages: {}, libyears: 0 }
 
     for (const [packageJsonPath, analyzer] of analyzers.entries()) {
-      result[packageJsonPath] = analyzer.result
+      result.packages[packageJsonPath] = analyzer.result
       result.libyears += analyzer.result.libyears
     }
 
