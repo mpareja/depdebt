@@ -4,27 +4,53 @@ import path from 'path'
 import { PackageAnalyzer } from '../package-analyzer.js'
 import { Registry } from '../registry.js'
 import { NullTelemetry } from '../concurrent-proxy/concurrent-proxy.js'
-import { format } from 'util'
+import { format, parseArgs } from 'node:util'
+
+async function main () {
+  const { values, positionals } = parseArguments()
+
+  const registry = new Registry()
+  const analyzer = new PackageAnalyzer(registry, {
+    tagPrecedence: values.tagPrecedence,
+    missingPackageStrategy: values.missing,
+    telemetry: new StderrTelemetry()
+  })
+
+  const lines = positionals.length > 0
+    ? positionals
+    : readLines(process.stdin)
+
+  const packageJsonPaths = resolvePaths(lines)
+
+  const result = await analyzer.anaylzePackages(packageJsonPaths)
+
+  console.log(JSON.stringify(result, null, 2))
+}
+
+function parseArguments () {
+  return parseArgs({
+    allowPositionals: true,
+    strict: true,
+    options: {
+      tagPrecedence: {
+        type: 'string',
+        multiple: true,
+        short: 't',
+        default: ['latest']
+      },
+      missing: {
+        type: 'string',
+        short: 'm',
+        default: 'throw'
+      }
+    }
+  })
+}
 
 class StderrTelemetry extends NullTelemetry {
   onError (key, args, e) {
     process.stderr.write(`${key}(${args}): ${format(e)}\n`)
   }
-}
-
-async function main () {
-  const registry = new Registry()
-  const analyzer = new PackageAnalyzer(registry, {
-    tagPrecedence: ['lts', 'latest'],
-    missingPackageStrategy: 'ignore',
-    telemetry: new StderrTelemetry()
-  })
-
-  const packageJsonPaths = resolvePaths(readLines(process.stdin))
-
-  const result = await analyzer.anaylzePackages(packageJsonPaths)
-
-  console.log(JSON.stringify(result, null, 2))
 }
 
 async function * resolvePaths (stream) {
