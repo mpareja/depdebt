@@ -63,7 +63,6 @@ export function createExecutor (options = {}) {
               telemetry.started(key, args, queues)
               inFlight++
               // TODO: throw if result is returned
-              // TODO: handle errors
               try {
                 await target[key].apply(receiver, args)
               } catch (e) {
