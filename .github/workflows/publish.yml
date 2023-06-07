@@ -1,0 +1,21 @@
+name: Node.js Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+      - run: |
+          # WORKAROUND: npm broke --ignore-scripts on publish (npm/cli#3707)
+          npm install --no-save simple-git-hooks
+          npm publish --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
