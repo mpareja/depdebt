@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import path from 'path'
+import { ChartTelemetry } from '../concurrent-proxy/chart-telemetry.js'
 import { PackageAnalyzer } from '../package-analyzer.js'
 import { Registry } from '../registry.js'
-import { StderrTelemetry } from '../concurrent-proxy/stderr-telemetry.js'
 import { parseArgs } from 'node:util'
 
 async function main () {
@@ -17,7 +17,7 @@ async function main () {
   const analyzer = new PackageAnalyzer(registry, {
     tagPrecedence: values.tagPrecedence,
     missingPackageStrategy: values.missing,
-    telemetry: new StderrTelemetry()
+    telemetry: new ChartTelemetry()
   })
 
   const lines = values.stdin
