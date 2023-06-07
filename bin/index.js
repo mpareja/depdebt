@@ -3,8 +3,8 @@
 import path from 'path'
 import { PackageAnalyzer } from '../package-analyzer.js'
 import { Registry } from '../registry.js'
-import { format, parseArgs } from 'node:util'
-import { NullTelemetry } from '../concurrent-proxy/null-telemetry.js'
+import { StderrTelemetry } from '../concurrent-proxy/stderr-telemetry.js'
+import { parseArgs } from 'node:util'
 
 async function main () {
   const { values, positionals } = parseArguments()
@@ -77,12 +77,6 @@ function printUsage () {
   console.log('  depdebt package.json')
   console.log('  depdebt -t lts -t latest package.json')
   console.log('  find -name package.json -not -path \'*/node_modules/*\' | depdebt')
-}
-
-class StderrTelemetry extends NullTelemetry {
-  onError (key, args, e) {
-    process.stderr.write(`${key}(${args}): ${format(e)}\n`)
-  }
 }
 
 async function * resolvePaths (stream) {
