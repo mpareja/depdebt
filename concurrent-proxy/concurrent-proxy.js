@@ -43,7 +43,7 @@ export function createExecutor (options = {}) {
       get (target, key, receiver) {
         if (typeof target[key] === 'function') {
           return async function (...args) {
-            telemetry.enqueuing(key, args)
+            telemetry.enqueuing(key, args, queues)
 
             let queue = queues.get(key)
             if (!queue) {
@@ -60,7 +60,7 @@ export function createExecutor (options = {}) {
             }
 
             queue.add(async () => {
-              telemetry.started(key, args)
+              telemetry.started(key, args, queues)
               inFlight++
               // TODO: throw if result is returned
               // TODO: handle errors
@@ -72,7 +72,7 @@ export function createExecutor (options = {}) {
                 abort()
               }
               inFlight--
-              telemetry.completed(key, args)
+              telemetry.completed(key, args, queues)
             })
           }
         } else {
