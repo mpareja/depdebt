@@ -21,6 +21,6 @@ describe('interactive tests', () => {
     console.log(process.cwd())
 
     const result = await analyzer.anaylzePackages(packageJsonFiles)
-    console.log(result)
+    console.log(JSON.stringify(result, null, 2))
   })
 })

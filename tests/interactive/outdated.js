@@ -10,6 +10,6 @@ describe('interactive tests', () => {
     const pkg = JSON.parse(await fs.readFile(new URL('outdated/package.json', import.meta.url)))
     const pkgLock = JSON.parse(await fs.readFile(new URL('outdated/package-lock.json', import.meta.url)))
     const result = await analyzer.analyze(pkg, pkgLock)
-    console.log(result)
+    console.log(JSON.stringify(result, null, 2))
   })
 })
