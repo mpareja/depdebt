@@ -34,7 +34,7 @@ export class PackageAnalysis {
   async analyze (packageJson, packageLockJson) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
     for (const [dep, spec] of Object.entries(dependencies)) {
-      this.result.dependencies[dep] = { spec }
+      this.result.dependencies[dep] = { name: dep, spec }
       await this.getDepMetadata(dep, packageLockJson)
     }
   }
