@@ -40,12 +40,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mpareja/dependency-debt.git"
+    "url": "git+https://github.com/mpareja/depdebt.git"
   },
   "bugs": {
-    "url": "https://github.com/mpareja/dependency-debt/issues"
+    "url": "https://github.com/mpareja/depdebt/issues"
   },
-  "homepage": "https://github.com/mpareja/dependency-debt#readme",
+  "homepage": "https://github.com/mpareja/depdebt#readme",
   "dependencies": {
     "@npmcli/config": "^6.2.0",
     "npm": "^9.6.7",
