@@ -1,3 +1,13 @@
+## v0.1.2: Account for @npmcli/config changes (2023-11-12)
+
+### Highlights
+
+- `depdebt` depends on `@npmcli/config` internals. Update the usage to account for breaking changes and pin the dependency version.
+
+### Commits
+
+- ([`c1b4ba5`](https://github.com/mpareja/depdebt/commit/c1b4ba58bec06093c78d4ef57aebc84a56d5d0a5)) package: update and pin npm packages since we're using internals
+
 ## v0.1.1: Packaging improvements (2023-06-13)
 
 ### Highlights
