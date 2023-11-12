@@ -14,8 +14,7 @@ export class Registry {
   async loadNpmConfig () {
     // much of this is tediously recreated from staring at `npm` source code
     const npmPath = path.dirname(require.resolve('npm'))
-    const utilsPath = path.resolve(npmPath, 'lib', 'utils', 'config', 'index.js')
-    const { definitions, flatten, shorthands } = require(utilsPath)
+    const { definitions, flatten, shorthands } = require('@npmcli/config/lib/definitions')
 
     const config = new Config({
       npmPath,
