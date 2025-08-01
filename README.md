@@ -85,3 +85,32 @@ If a `package-lock.json` file is present, `depdebt` uses the version found in th
 
 For applications deployed _based_ on the `package-lock.json` committed into source control, the `package-lock.json` should certainly be used. For libraries that are later installed based on the `package.json` file, it's best to use the `package.json` version rather than `package-lock.json` version.
 
+### Useful Examples
+
+You're in a monorepo and want a summary of the libyears for the whole repo and packages in the repo:
+
+```bash
+$ find -name package.json -not -path '*/node_modules/*' | depdebt - | jq '.packages |= with_entries(.value |= {libyears})'
+{
+  "packages": {
+    "/depdebt/tests/fixtures/mono/packages/pack-c/package.json": {
+      "libyears": 0
+    },
+    "/depdebt/tests/fixtures/mono/packages/pack-a/package.json": {
+      "libyears": 0
+    },
+    "/depdebt/tests/fixtures/mono/packages/pack-b/package.json": {
+      "libyears": 0
+    },
+    "/depdebt/tests/fixtures/mono/package.json": {
+      "libyears": 0
+    }
+  },
+  "tagPrecedence": [
+    "latest"
+  ],
+  "missingPackageStrategy": "throw",
+  "libyears": 0
+}
+```
+
