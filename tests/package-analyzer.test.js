@@ -69,6 +69,15 @@ describe('package-analyzer', () => {
     })
   })
 
+  it('ignores local file dependencies since they cannot be out of date', async () => {
+    const { analyzer, packageJson } = setup()
+    packageJson.dependencies.node = 'file:../node'
+
+    const result = await analyzer.analyze(packageJson)
+
+    expect(result.dependencies.node).toBeUndefined()
+  })
+
   describe('latest metadata', () => {
     it('matches the "latest" release metadata', async () => {
       const { analyzer, packageJson } = setup()

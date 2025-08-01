@@ -11,6 +11,11 @@ export class PackageAnalysis {
   async analyze (packageJson, packageLockJson) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
     for (const [dep, spec] of Object.entries(dependencies)) {
+      if (spec.startsWith('file:')) {
+        // ignore local file references, they can't be out of date
+        continue
+      }
+
       this.result.dependencies[dep] = { name: dep, spec }
       await this.getDepMetadata(dep, packageLockJson)
     }
