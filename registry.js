@@ -28,11 +28,11 @@ export class Registry {
     this.config = config.flat
   }
 
-  async getPackument (dependency) {
+  async getPackument (nameAndSpec) {
     await this.loadNpmConfigP
 
     // fullMetadata is required in order to get publish timestamps
-    return pacote.packument(dependency, {
+    return pacote.packument(nameAndSpec, {
       ...this.config,
       fullMetadata: true
     })
@@ -40,13 +40,22 @@ export class Registry {
 }
 
 export class SubstituteRegistry {
-  async getPackument (dependency) {
+  async getPackument (nameAndSpec) {
+    let name
+    const parts = nameAndSpec.split('@')
+    if (parts.length > 2) {
+      // org name used
+      name = parts[1].replace('/', '__')
+    } else {
+      name = parts[0]
+    }
+
     try {
-      const file = new URL(`tests/fixtures/${dependency}-packument.json`, import.meta.url)
+      const file = new URL(`tests/fixtures/${name}-packument.json`, import.meta.url)
       const data = await fs.readFile(file, 'utf8')
       return JSON.parse(data)
     } catch (e) {
-      const error = new Error(`SubstituteRegistry: getPackument: unexpected package name "${dependency}"`)
+      const error = new Error(`SubstituteRegistry: getPackument: unexpected package name "${name}"`)
       error.statusCode = 404 // like npm
       throw error
     }

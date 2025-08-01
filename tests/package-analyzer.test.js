@@ -69,13 +69,30 @@ describe('package-analyzer', () => {
     })
   })
 
-  it('ignores local file dependencies since they cannot be out of date', async () => {
-    const { analyzer, packageJson } = setup()
-    packageJson.dependencies.node = 'file:../node'
+  describe('version spec edge cases', () => {
+    it('local file dependencies: ignored since they cannot be out of date', async () => {
+      const { analyzer, packageJson } = setup()
+      packageJson.dependencies.node = 'file:../node'
 
-    const result = await analyzer.analyze(packageJson)
+      const result = await analyzer.analyze(packageJson)
 
-    expect(result.dependencies.node).toBeUndefined()
+      expect(result.dependencies.node).toBeUndefined()
+    })
+
+    it('version spec with "npm:" prefix: traversed', async () => {
+      const { analyzer, packageJson } = setup()
+      packageJson.dependencies.nodeV16 = 'npm:node@^16'
+      packageJson.dependencies.nodeV16withOrg = 'npm:@nodejs/node@^16'
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.dependencies.nodeV16).toMatchObject({
+        actual: '16.20.0'
+      })
+      expect(result.dependencies.nodeV16withOrg).toMatchObject({
+        actual: '16.20.0'
+      })
+    })
   })
 
   describe('latest metadata', () => {

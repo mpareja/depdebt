@@ -10,23 +10,40 @@ export class PackageAnalysis {
 
   async analyze (packageJson, packageLockJson) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
-    for (const [dep, spec] of Object.entries(dependencies)) {
+    for (const [name, spec] of Object.entries(dependencies)) {
       if (spec.startsWith('file:')) {
         // ignore local file references, they can't be out of date
         continue
       }
 
-      this.result.dependencies[dep] = { name: dep, spec }
-      await this.getDepMetadata(dep, packageLockJson)
+      let resolvedName = name
+      let resolvedSpec = spec
+      if (spec.startsWith('npm:')) {
+        const parts = spec.substring(4).split('@')
+
+        // account for @ used for org-name (ex: @nodejs/node)
+        if (parts.length > 2) {
+          resolvedName = `@${parts[1]}`
+          resolvedSpec = parts[2]
+        } else {
+          resolvedName = parts[0]
+          resolvedSpec = parts[1]
+        }
+      }
+
+      this.result.dependencies[name] = { name, resolvedName, spec, resolvedSpec }
+      await this.getDepMetadata(name, packageLockJson)
     }
   }
 
   async getDepMetadata (dep, packageLockJson) {
     const dependency = this.result.dependencies[dep]
+    const { name, resolvedName, spec, resolvedSpec } = dependency
+    const resolvedNameAndSpec = `${resolvedName}@${resolvedSpec}`
 
     let packument
     try {
-      packument = await this.registry.getPackument(dep)
+      packument = await this.registry.getPackument(resolvedNameAndSpec)
     } catch (e) {
       if (e.statusCode === 404 && this.options.missingPackageStrategy === 'ignore') {
         dependency.libyears = 0
@@ -40,9 +57,9 @@ export class PackageAnalysis {
     dependency.tags = { ...tags }
 
     try {
-      dependency.specWanted = pickManifest(packument, dependency.spec).version
+      dependency.specWanted = pickManifest(packument, resolvedSpec).version
     } catch (cause) {
-      throw new Error(`unable to identify version for ${dep}@${dependency.spec}`, { cause })
+      throw new Error(`unable to identify version for ${name}@${spec}`, { cause })
     }
 
     // if package-lock.json is committed to repo, use that
