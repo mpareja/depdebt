@@ -1,3 +1,20 @@
+## v0.2.0: Improved monorepo support (2025-08-01)
+
+### Highlights
+
+- ignore `file:` and `workspace:` dependencies that can't be out of date
+- support redirected packages with `npm:` version specs
+- **BREAKING**: require Node.js >= 22
+
+### Commits
+
+- ([`12fbbe9`](https://github.com/mpareja/depdebt/commit/12fbbe9df30b4a9ebfb30968e324062f1b74e039)) package: bump version to 0.2.0
+- ([`e5de441`](https://github.com/mpareja/depdebt/commit/e5de44167c70ff827392d3912091b929bb88041b)) PackageAnalyser: support ignoring workspace references
+- ([`4c31080`](https://github.com/mpareja/depdebt/commit/4c310807276390ded70e4587a2c9accbd4332117)) README: add example for summarizing libyears
+- ([`ab269b8`](https://github.com/mpareja/depdebt/commit/ab269b811d35f055f747d8cccb7ae19f04897a16)) handle dependencies with "npm:" prefixes
+- ([`c0c4930`](https://github.com/mpareja/depdebt/commit/c0c4930a88d0b0c86554636be25423ed6ecd032f)) PackageAnalysis: ignore local file dependencies
+- ([`a7b2b9f`](https://github.com/mpareja/depdebt/commit/a7b2b9fb114d4f66c436553e484c01849a5aabba)) PackageAnalysis: remove moved method
+
 ## v0.1.2: Account for @npmcli/config changes (2023-11-12)
 
 ### Highlights
