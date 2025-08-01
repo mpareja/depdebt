@@ -79,6 +79,15 @@ describe('package-analyzer', () => {
       expect(result.dependencies.node).toBeUndefined()
     })
 
+    it('workspace dependencies (pnpm): ignored since they cannot be out of date', async () => {
+      const { analyzer, packageJson } = setup()
+      packageJson.dependencies.node = 'workspace:../node'
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.dependencies.node).toBeUndefined()
+    })
+
     it('version spec with "npm:" prefix: traversed', async () => {
       const { analyzer, packageJson } = setup()
       packageJson.dependencies.nodeV16 = 'npm:node@^16'
