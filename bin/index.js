@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { PackageAnalyzer } from '../package-analyzer.js'
+import { readFileSync } from 'fs'
 import { Registry } from '../registry.js'
 import { StderrTelemetry } from '../concurrent-proxy/stderr-telemetry.js'
 import { parseArgs } from 'node:util'
@@ -10,6 +12,10 @@ async function main () {
   const { values, positionals } = parseArguments()
   if (values.help) {
     printUsage()
+    return
+  }
+  if (values.version) {
+    console.log(getVersion())
     return
   }
 
@@ -50,6 +56,10 @@ function parseArguments () {
       help: {
         type: 'boolean',
         short: 'h'
+      },
+      version: {
+        type: 'boolean',
+        short: 'v'
       }
     }
   })
@@ -78,6 +88,8 @@ function printUsage () {
   console.log('  depdebt package.json')
   console.log('  depdebt -t lts -t latest package.json')
   console.log('  find -name package.json -not -path \'*/node_modules/*\' | depdebt')
+  console.log()
+  console.log(`Version: ${getVersion()}`)
 }
 
 async function * resolvePaths (stream) {
@@ -100,6 +112,13 @@ async function * readLines (stream) {
   if (buffer.length > 0) {
     yield buffer
   }
+}
+
+function getVersion () {
+  const packagePath = fileURLToPath(import.meta.url + '/../../package.json')
+  const packageRaw = readFileSync(packagePath)
+  const packageParsed = JSON.parse(packageRaw)
+  return packageParsed.version
 }
 
 main()

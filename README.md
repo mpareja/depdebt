@@ -43,6 +43,8 @@ Examples:
   depdebt package.json
   depdebt -t lts -t latest package.json
   find -name package.json -not -path '*/node_modules/*' | depdebt
+
+Version: 0.3.0
 ```
 
 ### Tag precedence
