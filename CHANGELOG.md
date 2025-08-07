@@ -1,3 +1,14 @@
+## v0.3.0: show version information (2025-08-07)
+
+### Highlights
+
+- The `--help` usage output includes the depdebt version
+- Adds `--version` and `-v` to output the depdebt version
+
+### Commits
+
+- ([`98fb8cf`](https://github.com/mpareja/depdebt/commit/98fb8cf9593784a718b8930ce9a492870bbd2434)) support showing package version
+
 ## v0.2.0: Improved monorepo support (2025-08-01)
 
 ### Highlights
