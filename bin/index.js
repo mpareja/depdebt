@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import path from 'path'
-import { fileURLToPath } from 'url'
+import { getVersion } from '../version.js'
 import { PackageAnalyzer } from '../package-analyzer.js'
-import { readFileSync } from 'fs'
+import { parseArgs } from 'node:util'
 import { Registry } from '../registry.js'
 import { StderrTelemetry } from '../concurrent-proxy/stderr-telemetry.js'
-import { parseArgs } from 'node:util'
 
 async function main () {
   const { values, positionals } = parseArguments()
@@ -112,13 +111,6 @@ async function * readLines (stream) {
   if (buffer.length > 0) {
     yield buffer
   }
-}
-
-function getVersion () {
-  const packagePath = fileURLToPath(import.meta.url + '/../../package.json')
-  const packageRaw = readFileSync(packagePath)
-  const packageParsed = JSON.parse(packageRaw)
-  return packageParsed.version
 }
 
 main()
