@@ -1,3 +1,13 @@
+## v0.3.1: fix version when installed globally (2025-08-08)
+
+### Highlights
+
+- The --version and --help commands once again work when installed globally (i.e. via `npm i -g depdebt`).
+
+### Commits
+
+- ([`245dcb1`](https://github.com/mpareja/depdebt/commit/245dcb18bb834826114d568dcc9267c8f09d8d0a)) correct --version handling when installed globally
+
 ## v0.3.0: show version information (2025-08-07)
 
 ### Highlights
