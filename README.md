@@ -7,19 +7,19 @@ A high-performance [libyear](https://libyear.com/) dependency debt analyzer for 
 To compute the libyears for the package in your current directory, run:
 
 ```bash
-npx depdebt
+npx depdebt@latest
 ```
 
 You can specify the `package.json` files to look at on the command-line:
 
 ```bash
-npx depdebt something/package.json
+npx depdebt@latest something/package.json
 ```
 
 If you have many files to analyze, pipe in a newline delimited list of file paths and pass `-` as the filename:
 
 ```bash
-find -name package.json -not -path '*/node_modules/*' | npx depdebt -
+find -name package.json -not -path '*/node_modules/*' | npx depdebt@latest -
 ```
 
 ## Usage
