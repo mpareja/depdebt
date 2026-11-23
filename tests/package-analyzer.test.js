@@ -88,6 +88,24 @@ describe('package-analyzer', () => {
       expect(result.dependencies.node).toBeUndefined()
     })
 
+    it('http dependencies: ignored since they cannot be out of date ', async () => {
+      const { analyzer, packageJson } = setup()
+      packageJson.dependencies.node = 'http://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz'
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.dependencies.node).toBeUndefined()
+    })
+
+    it('https dependencies: ignored since they cannot be out of date ', async () => {
+      const { analyzer, packageJson } = setup()
+      packageJson.dependencies.node = 'https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz'
+
+      const result = await analyzer.analyze(packageJson)
+
+      expect(result.dependencies.node).toBeUndefined()
+    })
+
     it('version spec with "npm:" prefix: traversed', async () => {
       const { analyzer, packageJson } = setup()
       packageJson.dependencies.nodeV16 = 'npm:node@^16'

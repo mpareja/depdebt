@@ -11,8 +11,8 @@ export class PackageAnalysis {
   async analyze (packageJson, packageLockJson, packageJsonPath) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
     for (const [name, spec] of Object.entries(dependencies)) {
-      if (spec.startsWith('file:') || spec.startsWith('workspace:')) {
-        // ignore local file references, they can't be out of date
+      if (/^(file|workspace|http|https):/.test(spec)) {
+        // ignore local file and fixed references, they can't be out of date
         continue
       }
 
