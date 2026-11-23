@@ -4,7 +4,7 @@
   "description": "",
   "private": false,
   "engines": {
-    "node": ">=22"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "type": "module",
   "exports": "./package-analyzer.js",
@@ -33,9 +33,9 @@
   "author": "Mario Pareja",
   "license": "MIT",
   "devDependencies": {
-    "@jest/expect": "^29.7.0",
+    "@jest/expect": "^30.5.2",
     "opener": "^1.5.2",
-    "simple-git-hooks": "^2.12.1",
+    "simple-git-hooks": "^2.14.0",
     "standard": "^17.1.2"
   },
   "repository": {
@@ -47,10 +47,10 @@
   },
   "homepage": "https://github.com/mpareja/depdebt#readme",
   "dependencies": {
-    "@npmcli/config": "10.2.0",
-    "npm": "11.3.0",
-    "npm-pick-manifest": "^10.0.0",
-    "p-queue": "^8.1.0",
-    "pacote": "^21.0.0"
+    "@npmcli/config": "11.2.1",
+    "npm": "12.2.3",
+    "npm-pick-manifest": "^12.0.0",
+    "p-queue": "^10.0.0",
+    "pacote": "^22.0.1"
   }
 }
