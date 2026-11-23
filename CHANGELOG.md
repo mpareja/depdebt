@@ -3,15 +3,21 @@
 ### Highlights
 
 - ignore `http:` and `https:` dependencies that can't be out of date
+- The --version and --help commands once again work when installed globally (i.e. via `npm i -g depdebt`).
 
 ### Commits
 
+- ([`5eabdd9`](https://github.com/mpareja/depdebt/commit/5eabdd9d80cfa2da1b5f80996ebafa52cdc85b9d)) github: update actions and tests node 22-26
+- ([`c2e9327`](https://github.com/mpareja/depdebt/commit/c2e9327ede8170d24dc206daf475fb07083bc1e5)) package: bump version to 0.3.2
 - ([`c0fb60e`](https://github.com/mpareja/depdebt/commit/c0fb60ee00947cfebd21d564bb1b3953acf3d3a6)) package: upgrade dependencies
 - ([`b33eaa9`](https://github.com/mpareja/depdebt/commit/b33eaa93cf6b5a15be4510724176f99657a5dcad)) analysis: ignore http and https dependencies
 - ([`0eef24f`](https://github.com/mpareja/depdebt/commit/0eef24fd6bf8dd82c1545529f9485cdc01284245)) analysis: improve errors when getPackument fails
 - ([`bd87825`](https://github.com/mpareja/depdebt/commit/bd87825f2d94f6cd2a44591a7ec1feae1b4d52aa)) README: add @latest to command invocations
+- ([`f319678`](https://github.com/mpareja/depdebt/commit/f319678410ced80df995530d308d6ccaa141722e)) package: bump version to 0.3.1
+- ([`245dcb1`](https://github.com/mpareja/depdebt/commit/245dcb18bb834826114d568dcc9267c8f09d8d0a)) correct --version handling when installed globally
 
-## v0.3.1: fix version when installed globally (2025-08-08)
+
+## v0.3.1: fix version when installed globally (2025-08-08 UNRELEASED)
 
 ### Highlights
 
