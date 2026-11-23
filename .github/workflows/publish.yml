@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -17,5 +21,3 @@ jobs:
           # WORKAROUND: npm broke --ignore-scripts on publish (npm/cli#3707)
           npm install --no-save simple-git-hooks
           npm publish --ignore-scripts
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
