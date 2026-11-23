@@ -33,10 +33,10 @@ export class PackageAnalyzer {
 
     const directoryAnalysis = createProxy(new DirectoryAnalysis())
 
-    await directoryAnalysis.analyzePackages(packageJsonPaths, async (packageJsonPath, pkg, pkgJson) => {
+    await directoryAnalysis.analyzePackages(packageJsonPaths, async (packageJsonPath, packageJson, packageLockJson) => {
       const analyzer = createProxy(new PackageAnalysis(this.registry, this.analysisOptions))
       analyzers.set(packageJsonPath, analyzer)
-      await analyzer.analyze(pkg, pkgJson)
+      await analyzer.analyze(packageJson, packageLockJson, packageJsonPath)
     })
 
     await onFinished()

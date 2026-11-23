@@ -8,7 +8,7 @@ export class PackageAnalysis {
     this.options = options
   }
 
-  async analyze (packageJson, packageLockJson) {
+  async analyze (packageJson, packageLockJson, packageJsonPath) {
     const dependencies = { ...packageJson.devDependencies, ...packageJson.dependencies }
     for (const [name, spec] of Object.entries(dependencies)) {
       if (spec.startsWith('file:') || spec.startsWith('workspace:')) {
@@ -32,11 +32,11 @@ export class PackageAnalysis {
       }
 
       this.result.dependencies[name] = { name, resolvedName, spec, resolvedSpec }
-      await this.getDepMetadata(name, packageLockJson)
+      await this.getDepMetadata(name, packageLockJson, packageJsonPath)
     }
   }
 
-  async getDepMetadata (dep, packageLockJson) {
+  async getDepMetadata (dep, packageLockJson, packageJsonPath) {
     const dependency = this.result.dependencies[dep]
     const { name, resolvedName, spec, resolvedSpec } = dependency
     const resolvedNameAndSpec = `${resolvedName}@${resolvedSpec}`
@@ -50,7 +50,11 @@ export class PackageAnalysis {
         dependency.missing = true
         return
       }
-      throw e
+      throw Object.assign(new Error('unable to getPackument', { cause: e }), {
+        dep,
+        resolvedNameAndSpec,
+        packageJsonPath
+      })
     }
 
     const tags = packument['dist-tags']
